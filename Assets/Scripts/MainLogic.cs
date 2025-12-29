@@ -11,14 +11,16 @@ public class MainLogic : MonoBehaviour
     Color[] colors;
     Renderer[] cubesRenderer;
 
+    Vector2Int currentIndex;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //Vector2Int startIndex = GetRandomIndex(dataManager.height, dataManager.width);
-        //cubesRenderer = new Renderer[cubes.Length];
-        // for (int i = 0; i < cubes.Length; i++)
-        //     cubesRenderer[i] = cubes[i].GetComponent<Renderer>();
-        //Colorize(startIndex);
+        Vector2Int currentIndex = GetRandomIndex(dataManager.height, dataManager.width);
+        cubesRenderer = new Renderer[cubes.Length];
+        for (int i = 0; i < cubes.Length; i++)
+            cubesRenderer[i] = cubes[i].GetComponent<Renderer>();
+        Colorize(currentIndex);
     }
 
     // Update is called once per frame
@@ -33,7 +35,7 @@ public class MainLogic : MonoBehaviour
         int count = 0;
         for (int i = -1; i < 2; i++)
             for (int j = -1; j < 2; j++){
-                int colorNum = dataManager.data[(index.y + i) % dataManager.height, (index.x + j) % dataManager.width];
+                int colorNum = dataManager.data[(index.x + i + dataManager.height) % dataManager.height, (index.y + j + dataManager.width) % dataManager.width] - 1;
                 cubesRenderer[count].material.color = colors[colorNum];
                 count++;
             }
@@ -41,6 +43,6 @@ public class MainLogic : MonoBehaviour
 
     Vector2Int GetRandomIndex(int height, int width)
     {
-        return new Vector2Int(Random.Range(0, height), Random.Range(0, width));
+        return new Vector2Int(Random.Range(0, width), Random.Range(0, height));
     }
 }
