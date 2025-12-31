@@ -28,7 +28,7 @@ public class MainLogic : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.W))
         {
-           currentIndex.x = (currentIndex.x + 1 + dataManager.height) % dataManager.height;
+           currentIndex.x = (currentIndex.x - 1 + dataManager.height) % dataManager.height;
            Colorize(currentIndex);
         } else if (Input.GetKeyDown(KeyCode.A))
         {
@@ -36,7 +36,7 @@ public class MainLogic : MonoBehaviour
            Colorize(currentIndex);
         } else if (Input.GetKeyDown(KeyCode.S))
         {
-           currentIndex.x = (currentIndex.x - 1 + dataManager.height) % dataManager.height;
+           currentIndex.x = (currentIndex.x + 1 + dataManager.height) % dataManager.height;
            Colorize(currentIndex);
         } else if (Input.GetKeyDown(KeyCode.D))
         {
