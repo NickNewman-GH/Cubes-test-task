@@ -6,6 +6,9 @@ public class MainLogic : MonoBehaviour
     DataManager dataManager;
 
     [SerializeField]
+    GameObject cubesContainer;
+    [SerializeField]
+    GameObject cubePrefab;
     GameObject[] cubes;
     [SerializeField]
     Color[] colors;
@@ -13,35 +16,77 @@ public class MainLogic : MonoBehaviour
 
     Vector2Int currentIndex;
 
+    float maxDelay = 1f, minDelay = 0.1f, delayTime = 0;
+    float currentDelay;
+
+    float fieldSideUnit = 5f;
+
+    Vector3 baseSpawnPoint = new Vector3(-100, -100, 0);
+
+    int minFieldSide = 1, maxFieldSide = 11, fieldSide = 9;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        SpawnCubes();
+        SetCubesActive();
         currentIndex = GetRandomIndex(dataManager.width, dataManager.height);
         cubesRenderer = new Renderer[cubes.Length];
         for (int i = 0; i < cubes.Length; i++)
             cubesRenderer[i] = cubes[i].GetComponent<Renderer>();
         Colorize(currentIndex);
+        currentDelay = maxDelay;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
         {
-           currentIndex.x = (currentIndex.x + 1 + dataManager.height) % dataManager.height;
-           Colorize(currentIndex);
-        } else if (Input.GetKeyDown(KeyCode.A))
+            if (delayTime >= currentDelay)
+            {
+                if (Input.GetKey(KeyCode.W))
+                    currentIndex.x = (currentIndex.x - 1 + dataManager.height) % dataManager.height;
+                else if (Input.GetKey(KeyCode.S))
+                    currentIndex.x = (currentIndex.x + 1 + dataManager.height) % dataManager.height;
+                if (Input.GetKey(KeyCode.A))
+                    currentIndex.y = (currentIndex.y - 1 + dataManager.width) % dataManager.width;
+                else if (Input.GetKey(KeyCode.D))
+                    currentIndex.y = (currentIndex.y + 1 + dataManager.width) % dataManager.width;
+                Colorize(currentIndex);
+                currentDelay = System.Math.Max(currentDelay / 1.5f, minDelay); 
+                delayTime = 0;
+            }
+        } else
         {
-           currentIndex.y = (currentIndex.y - 1 + dataManager.width) % dataManager.width;
-           Colorize(currentIndex);
-        } else if (Input.GetKeyDown(KeyCode.S))
+            delayTime = maxDelay;
+            currentDelay = maxDelay;
+        }
+        delayTime = System.Math.Min(delayTime + Time.deltaTime, maxDelay);
+    }
+
+    void SpawnCubes()
+    {
+        cubes = new GameObject[maxFieldSide * maxFieldSide];
+        for (int i = 0; i < maxFieldSide * maxFieldSide; i++) {
+            cubes[i] = Instantiate(cubePrefab, cubesContainer.transform);
+            cubes[i].transform.position = baseSpawnPoint;
+            cubes[i].SetActive(false);
+        }
+    }
+
+    void SetCubesActive()
+    {
+        float scale = fieldSideUnit / fieldSide;
+        float gap = scale * 0.2f;
+        scale -= gap;
+        Debug.Log($"{scale}, {gap}");
+        for (int i = 0; i < fieldSide * fieldSide; i++)
         {
-           currentIndex.x = (currentIndex.x - 1 + dataManager.height) % dataManager.height;
-           Colorize(currentIndex);
-        } else if (Input.GetKeyDown(KeyCode.D))
-        {
-           currentIndex.y = (currentIndex.y + 1 + dataManager.width) % dataManager.width;
-           Colorize(currentIndex);
+            cubes[i].SetActive(true);
+            cubes[i].transform.localScale = new Vector3(scale, scale, scale);
+            cubes[i].transform.position = new Vector3(i % fieldSide * (scale + gap) - fieldSideUnit / 2 + ((scale + gap) / 2), 0, (fieldSide * fieldSide - i - 1) / fieldSide * (scale + gap) - fieldSideUnit / 2 + ((scale + gap) / 2));
         }
     }
 
@@ -49,9 +94,9 @@ public class MainLogic : MonoBehaviour
     {
         Debug.Log(index);
         int count = 0;
-        for (int i = -1; i < 2; i++)
-            for (int j = -1; j < 2; j++){
-                int colorNum = dataManager.data[(index.x + i + dataManager.height) % dataManager.height, (index.y + j + dataManager.width) % dataManager.width] - 1;
+        for (int i = -(fieldSide / 2); i < (fieldSide / 2) + 1; i++)
+            for (int j = -(fieldSide / 2); j < (fieldSide / 2) + 1; j++){
+                int colorNum = dataManager.data[(index.x + i + dataManager.height) % dataManager.height, (index.y + j + dataManager.width) % dataManager.width];
                 cubesRenderer[count].material.color = colors[colorNum];
                 count++;
             }
