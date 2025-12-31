@@ -23,11 +23,13 @@ public class MainLogic : MonoBehaviour
 
     Vector3 baseSpawnPoint = new Vector3(-100, -100, 0);
 
-    int minFieldSide = 1, maxFieldSide = 11, fieldSide = 9;
+    int minFieldSide = 1, maxFieldSide, fieldSide = 9;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        maxFieldSide = System.Math.Min(dataManager.width, dataManager.height);
+        maxFieldSide -= 1 - (maxFieldSide % 2);  
         SpawnCubes();
         SetCubesActive();
         currentIndex = GetRandomIndex(dataManager.width, dataManager.height);
@@ -105,5 +107,29 @@ public class MainLogic : MonoBehaviour
     Vector2Int GetRandomIndex(int width, int height)
     {
         return new Vector2Int(Random.Range(0, width), Random.Range(0, height));
+    }
+
+    public void DeactivateCubes()
+    {
+        for (int i = 0; i < maxFieldSide * maxFieldSide; i++) {
+            cubes[i].transform.position = baseSpawnPoint;
+            cubes[i].SetActive(false);
+        }
+    }
+
+    public void PlusSize()
+    {
+        DeactivateCubes();
+        fieldSide = System.Math.Min(fieldSide + 2, maxFieldSide);
+        SetCubesActive();
+        Colorize(currentIndex);
+    }
+
+    public void MinusSize()
+    {
+        DeactivateCubes();
+        fieldSide = System.Math.Max(fieldSide - 2, minFieldSide);
+        SetCubesActive();
+        Colorize(currentIndex);
     }
 }
